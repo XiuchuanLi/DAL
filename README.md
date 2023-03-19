@@ -10,10 +10,25 @@ Download and unzip CIFAR-10, CIFAR-100 to `data/cifar10-data` and `data/cifar100
 
 ```(bash)
 python cifar.py\
-    -dataset {cifar10 or cifar100}\
-    -mode {label noise mode: symmetric, asymmetric or instance}\ 
-    -noise {label noise rate: 20 or 40 for any noise, and 60 or 80 for only symmetric noise}\ 
-    -loss {loss functions: ce, gce, sce, nlnl, btl, nce_and_rce, tce, nce_and_agce, sr, js or dal}\
+    --dataset {cifar10, cifar100}\
+    --mode {label noise mode: symmetric, asymmetric, instance}\ 
+    --noise {label noise rate: 20 or 40 for any noise, and 60 or 80 for only symmetric noise}\ 
+    --loss {loss functions: ce, gce, sce, nlnl, btl, nce_and_rce, tce, nce_and_agce, sr, js, dal}\
+    --q {hyper-parameter of gce and nce_and_agce}
+    --alpha {hyper-parameter of sce, nce_and_rce, and nce_and_agce}
+    --beta {hyper-parameter of sce, nce_and_rce, and nce_and_agce}
+    --N {hyper-parameter of nlnl}
+    --t1 {hyper-parameter of btl}
+    --t2 {hyper-parameter of btl}
+    --t {hyper-parameter of tce}
+    --a {hyper-parameter of nce_and_agce}
+    --tau {hyper-parameter of sr}
+    --p {hyper-parameter of sr}
+    --lamb {hyper-parameter of sr}
+    --rho {hyper-parameter of sr}
+    --pi {hyper-parameter of js}
+    --qs {hyper-parameter of dal}
+    --qe {hyper-parameter of dal}
 ```
 
 Download Mini-WebVision to `data/mini-webvision-data/train` and `data/mini-webvision-data/val` folder.
