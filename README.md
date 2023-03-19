@@ -31,5 +31,22 @@ python cifar.py\
     --qe {hyper-parameter of dal}
 ```
 
+(2) *Mini-WebVision*
 Download Mini-WebVision to `data/mini-webvision-data/train` and `data/mini-webvision-data/val` folder.
+
+```(bash)
+CUDA_VISIBLE_DEVICES="0,1,2,3" python -m torch.distributed.launch --nproc_per_node 4 webvision.py\
+    --loss {loss functions: ce, sce, nce_and_rce, agce, sr, js, dal}\
+    --q {hyper-parameter of agce}
+    --alpha {hyper-parameter of sce, and nce_and_rce}
+    --beta {hyper-parameter of sce, and nce_and_rce}
+    --a {hyper-parameter of agce}
+    --tau {hyper-parameter of sr}
+    --p {hyper-parameter of sr}
+    --lamb {hyper-parameter of sr}
+    --rho {hyper-parameter of sr}
+    --pi {hyper-parameter of js}
+    --qs {hyper-parameter of dal}
+    --qe {hyper-parameter of dal}
+```
 
