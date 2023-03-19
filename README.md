@@ -50,3 +50,8 @@ CUDA_VISIBLE_DEVICES="0,1,2,3" python -m torch.distributed.launch --nproc_per_no
     --qe {hyper-parameter of dal}
 ```
 
+## Requirements
+- python 3.8.13
+- numpy 1.23.5
+- pytorch 1.8.0
+- torchvision 0.9.0
