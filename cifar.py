@@ -55,9 +55,9 @@ if args.dataset == 'cifar10':
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
-    train_dataset = noisy_loader.NoisyCIFAR10(root='data/cifar10-data', noise=args.noise, mode=args.mode,
+    train_dataset = noisy_loader.NoisyCIFAR10(root='../data/cifar10-data', noise=args.noise, mode=args.mode,
                                               train=True, transform=transform_train, download=True)
-    test_dataset = datasets.CIFAR10(root='data/cifar10-data',
+    test_dataset = datasets.CIFAR10(root='../data/cifar10-data',
                                     train=False, transform=transform_test, download=True)
     num_categories = 10
 elif args.dataset == 'cifar100':
@@ -110,8 +110,8 @@ elif args.loss == 'tce':
     criterions = [losses.TCE(num_classes=num_categories, order=args.t) for _ in range(epochs)]
 elif args.loss == 'nce_and_agce':
     criterions = [losses.NCEandAGCE(num_classes=num_categories, a=args.a, q=args.q, alpha=args.alpha, beta=args.beta) for _ in range(epochs)]
-elif args.loss == 'sr':
-    criterions = [losses.SR(lamb=args.lamb * (args.rho ** i), tau=args.tau, p=args.p) for i in range(epochs)]
+elif args.loss == 'ce_and_sr':
+    criterions = [losses.CEandSR(lamb=args.lamb * (args.rho ** i), tau=args.tau, p=args.p) for i in range(epochs)]
 elif args.loss == 'js':
     criterions = [losses.JS(num_classes=num_categories, pi=args.pi) for _ in range(epochs)]
 elif args.loss == 'dal':
@@ -159,3 +159,4 @@ for epoch in range(1, epochs+1):
     with open(f'{args.loss}/{args.mode}/{args.dataset}_{args.noise}.csv', 'a', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=",")
         writer.writerow([epoch, correct * 100 / total])
+
