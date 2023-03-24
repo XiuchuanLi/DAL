@@ -108,20 +108,6 @@ class SCE(nn.Module):
         loss = self.alpha * ce + self.beta * rce
         return loss
 
-
-class POLY(nn.Module):
-    def __init__(self, num_classes=10, epsilon=1.0):
-        super(POLY, self).__init__()
-        self.epsilon = epsilon
-        self.ce = nn.CrossEntropyLoss()
-        self.mae = MAE(num_classes=num_classes)
-    
-    def forward(self, pred, labels):
-        ce = self.ce(pred, labels)
-        mae = self.mae(pred, labels)
-        loss = ce + self.epsilon * mae
-        return loss
-
         
 class NLNL(torch.nn.Module):
     def __init__(self, train_loader, num_classes=10, ln_neg=1):
