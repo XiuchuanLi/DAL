@@ -65,12 +65,12 @@ class GCE(nn.Module):
 class BS(object):
     def __call__(self, outputs):
         ## hard booststrapping
-        targets = torch.argmax(outputs, dim=1)
-        return nn.CrossEntropyLoss()(outputs, targets)
+        # targets = torch.argmax(outputs, dim=1)
+        # return nn.CrossEntropyLoss()(outputs, targets)
 
         ## soft bootstrapping
-        # probs = torch.softmax(outputs, dim=1)
-        # return torch.mean(torch.sum(-torch.log(probs+1e-6)*probs, dim=1))
+        probs = torch.softmax(outputs, dim=1)
+        return torch.mean(torch.sum(-torch.log(probs+1e-6)*probs, dim=1))
 
 
 class DAL(nn.Module):
@@ -251,9 +251,9 @@ class pNorm(nn.Module):
         return norm.mean()
 
 
-class SR(nn.Module):
+class CEandSR(nn.Module):
     def __init__(self, lamb, tau, p):
-        super(SR, self).__init__()
+        super(CEandSR, self).__init__()
         self.lamb = lamb
         self.tau = tau
         self.criterion = nn.CrossEntropyLoss()
