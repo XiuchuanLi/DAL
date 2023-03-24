@@ -254,6 +254,7 @@ class CEandSR(nn.Module):
 class BTL(nn.Module):
     def __init__(self, num_classes, t1, t2, num_iters=5):
         super(BTL, self).__init__()
+        assert (t1 < 1 and t2 > 1)
         self.num_classes = num_classes
         self.t1, self.t2 = t1, t2
         self.num_iters = num_iters
@@ -261,24 +262,18 @@ class BTL(nn.Module):
     def forward(self, pred, labels):
         labels = F.one_hot(labels, num_classes=self.num_classes).float()
         probabilities = self.tempered_softmax(pred, self.t2, self.num_iters)
-        temp1 = (self.log_t(labels + 1e-10, self.t1) - self.log_t(probabilities, self.t1)) * labels
+        temp1 = (self.log_t(labels + eps, self.t1) - self.log_t(probabilities, self.t1)) * labels
         temp2 = (1 / (2 - self.t1)) * (torch.pow(labels, 2 - self.t1) - torch.pow(probabilities, 2 - self.t1))
         loss_values = temp1 - temp2
         return torch.mean(torch.sum(loss_values, dim=-1))
 
     def log_t(self, u, t):
-        if t == 1.0:
-            return torch.log(u)
-        else:
-            return (u ** (1.0 - t) - 1.0) / (1.0 - t)
+        return (u ** (1.0 - t) - 1.0) / (1.0 - t)
 
     def exp_t(self, u, t):
-        if t == 1.0:
-            return torch.exp(u)
-        else:
-            return torch.relu(1.0 + (1.0 - t) * u) ** (1.0 / (1.0 - t))
+        return torch.relu(1.0 + (1.0 - t) * u) ** (1.0 / (1.0 - t))
 
-    def compute_normalization_fixed_point(self, activations, t, num_iters=5):
+    def compute_normalization(self, activations, t, num_iters=5):
         mu = torch.max(activations, dim=-1).values.view(-1, 1)
         normalized_activations_step_0 = activations - mu
 
@@ -293,17 +288,9 @@ class BTL(nn.Module):
 
         return -self.log_t(1.0 / logt_partition, t) + mu
 
-    def compute_normalization(self, activations, t, num_iters=5):
-        if t < 1.0:
-            return None
-        else:
-            return self.compute_normalization_fixed_point(activations, t, num_iters)
 
     def tempered_softmax(self, activations, t, num_iters=5):
-        if t == 1.0:
-            normalization_constants = torch.log(torch.sum(torch.exp(activations), dim=-1))
-        else:
-            normalization_constants = self.compute_normalization(activations, t, num_iters)
+        normalization_constants = self.compute_normalization(activations, t, num_iters)
 
         return self.exp_t(activations - normalization_constants, t)
 
