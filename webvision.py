@@ -83,18 +83,18 @@ elif args.loss == 'nce_and_rce':
     criterions = [losses.NCEandRCE(num_classes=num_categories, alpha=args.alpha, beta=args.beta).to(local_rank) for _ in range(epochs)]
 elif args.loss == 'agce':
     criterions = [losses.AGCE(num_classes=num_categories, a=args.a, q=args.q).to(local_rank) for _ in range(epochs)]
-elif args.loss == 'sr':
-    criterions = [losses.SR(lamb=args.lamb * (args.rho ** i), tau=args.tau, p=args.p).to(local_rank) for i in range(epochs)]
+elif args.loss == 'ce_and_sr':
+    criterions = [losses.CEandSR(lamb=args.lamb * (args.rho ** i), tau=args.tau, p=args.p).to(local_rank) for i in range(epochs)]
 elif args.loss == 'js':
     criterions = [losses.JS(num_classes=num_categories, pi=args.pi).to(local_rank) for _ in range(epochs)]
 elif args.loss == 'dal':
     t0 = (1 - args.qs) * epochs / (args.qe - args.qs)
     criterions = [losses.DAL(num_classes=num_categories, q=args.qs + (args.qe - args.qs) * (i / epochs),
-                  lamb=max(0, (i - t0) / (epochs - t0))).to(local_rank) for i in range(epochs)]
+                  lamb=max(0, (i - t0) / (epochs - t0))) for i in range(epochs)]
 else:
     raise ValueError
 
-for epoch in range(epochs):
+for epoch in range(1, epochs+1):
     # train
     model.train()
     trainloader.sampler.set_epoch(epoch)
@@ -109,7 +109,7 @@ for epoch in range(epochs):
         torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
         optimizer.step()
         avg_loss.update(loss.item(), len(data))
-        loop.set_description(f"Epoch {epoch+1}/{epochs} lr {optimizer.param_groups[0]['lr']:05.4e} loss {avg_loss.avg:05.4e}")
+        loop.set_description(f"Epoch {epoch}/{epochs} lr {optimizer.param_groups[0]['lr']:05.4e} loss {avg_loss.avg:05.4e}")
         loop.update()
     scheduler.step()
     # test
@@ -125,8 +125,8 @@ for epoch in range(epochs):
             total += data.shape[0]
         print(f'-----------------{correct * 100 / total}-----------------')
 
-    if not os.path.exists(f'{args.loss}'):
-        os.mkdir(f'{args.loss}')
-    with open(f'{args.loss}/webvision.csv', 'a', newline='') as csvfile:
-        writer = csv.writer(csvfile, delimiter=",")
-        writer.writerow([epoch, correct * 100 / total])
+        if not os.path.exists(f'{args.loss}'):
+            os.mkdir(f'{args.loss}')
+        with open(f'{args.loss}/webvision.csv', 'a', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=",")
+            writer.writerow([epoch, correct * 100 / total])
